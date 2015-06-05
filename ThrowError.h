@@ -8,7 +8,8 @@
 #define CONCAT_IT(x) CONCAT_DETAIL(x)
 #define SOURCE_LOCATION __FILE__"(" CONCAT_IT(__LINE__) ") "
 
-#define THROW_EXCEPTION(type, msg) \
-        throw type(std::string(msg) + "\nRaise from " + SOURCE_LOCATION);
+// check 'condition' and throw exception if false
+#define CHECK_CONTRACT(condition, msg) \
+        if (false == (condition)) throw std::runtime_error(std::string(msg) + "\nSource location: " + SOURCE_LOCATION);
 
 #endif //EXTERNAL_SORT_ERROR_HANDLING_H

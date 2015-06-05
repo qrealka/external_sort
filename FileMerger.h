@@ -2,7 +2,6 @@
 #define EXTERNAL_SORT_FILEMERGER_H
 
 #include "FileWrapper.h"
-#include <string>
 #include <list>
 
 namespace external_sort
@@ -11,10 +10,13 @@ namespace external_sort
 class FileMerger {
 
 public:
-    explicit FileMerger(const std::string &outFileName);
+    explicit FileMerger(const char* outFileName);
 
     void Merge(const std::list<external_sort::FileWrapper> &list);
     void Final();
+
+private:
+    FileWrapper m_outFile;
 };
 
 }

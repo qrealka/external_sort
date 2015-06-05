@@ -1,29 +1,37 @@
 cmake_minimum_required(VERSION 3.2)
 project(external_sort)
 
-# MAX_SORTED_SIZE - maximum size (in GB) of part of input file fol sorting
-# FILE_CHUNK_SIZE - size (in MB) of chunk data readed from input file
-# MAX_STRING_SIZE - maximum size (in KB) of strings
+# MAX_SORTED_SIZE       - maximum size (in GB) of part of input file fol sorting
+# FILE_CHUNK_SIZE       - size (in MB) of chunk data readed from input file
+# MAX_STRING_SIZE       - maximum size (in KB) of strings
+# MAX_INPUT_FILE_SIZE   - maximum input file size in GB
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+# specify maximum inpu file size in GB
+if (NOT DEFINED MAX_INPUT_FILE_SIZE)
+    add_definitions(-DMAX_INPUT_FILE_SIZE=200)
+else()
+    add_definitions(-DMAX_INPUT_FILE_SIZE=${MAX_INPUT_FILE_SIZE})
+endif()
+
 # specify maximum size part of input file in GB
 if (NOT DEFINED MAX_SORTED_SIZE)
-    add_definitions(-DMAX_SORTED_SIZE=16384)
+    add_definitions(-DMAX_SORTED_SIZE=16)
 else()
     add_definitions(-DMAX_SORTED_SIZE=${MAX_SORTED_SIZE})
 endif()
 
 # file chunk size for reading in MB
 if (NOT DEFINED FILE_CHUNK_SIZE)
-    add_definitions(-DFILE_CHUNK_SIZE=8192)
+    add_definitions(-DFILE_CHUNK_SIZE=8)
 else()
     add_definitions(-DFILE_CHUNK_SIZE=${FILE_CHUNK_SIZE})
 endif()
 
 # limit std:string size in KB
 if (NOT DEFINED MAX_STRING_SIZE)
-    add_definitions(-DMAX_STRING_SIZE=512)
+    add_definitions(-DMAX_STRING_SIZE=64)
 else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()

@@ -13,10 +13,9 @@ class FileSplitter {
 
 public:
     typedef void (*OnSplitCallback)(FileWrapper&, RangeLines&);
-    explicit FileSplitter(const std::string &inputFileName);
+    explicit FileSplitter(const char* inputFileName);
 
-    void Split(int splitSize, OnSplitCallback onSplit);
-
+    void Split(int64_t splitSize, OnSplitCallback onSplit);
     const std::list<FileWrapper>& GetSplitResults() const;
 
 private:
