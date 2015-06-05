@@ -5,9 +5,7 @@ project(external_sort)
 # MAX_STRING_SIZE       - maximum size (in KB) of strings
 # MAX_INPUT_FILE_SIZE   - maximum input file size in GB
 
-if ( MSVC )
-    add_definitions(-Dint64_t=__int64)
-else()
+if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
@@ -32,6 +30,6 @@ else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()
 
-aux_source_directory(mphf SRC_HASH);
+aux_source_directory(mphf SRC_HASH)
 set(SOURCE_FILES main.cpp FileSplitter.cpp FileSplitter.h ThrowError.h Range.h FileWrapper.cpp FileWrapper.h FileMerger.cpp FileMerger.h Chm.hpp Chm.cpp  ${SRC_HASH})
 add_executable(external_sort ${SOURCE_FILES})

@@ -4,12 +4,18 @@
  * @copyright VaL Doroshchuk
  * @license GNU GPL v2
  * @package Mphf
+ *
+ * @date Jun 2015
+ * @fix compilation error by Dmitry Loginov <qrealka@gmail.com>
+ * @migrate to std::vector uniue_ptr by Dmitry Loginov <qrealka@gmail.com>
  */
 
 #ifndef MPHF_COMMON_GRAPH
 #define MPHF_COMMON_GRAPH
 
 #include "Node.hpp"
+#include <vector>
+#include <memory>
 
 namespace NMphf
 {
@@ -25,8 +31,7 @@ public:
      * Default constructor.
      * @param Fixed size of current graph.
      */
-    Graph(unsigned nodesCount) throw();
-    ~Graph();
+    explicit Graph(unsigned nodesCount) throw();
 
     /**
      * Connects nodes by their indecies.
@@ -53,12 +58,12 @@ public:
      * @param Index of requested node.
      * @see getNodesCount() to check how many nodes stored.
      */
-    Node* getNode(unsigned index);
+	std::unique_ptr<Node>& getNode(unsigned index);
 
     /**
      * @copydoc getNode()
      */
-    const Node* getNode(unsigned index) const;
+	const std::unique_ptr<Node>& getNode(unsigned index) const;
 
     /**
      * Returns true if current graph is cyclic.
@@ -86,17 +91,13 @@ public:
         );
 
 private:
+	typedef std::vector<char> BoolArray;
 
     /**
      * Prevents copying.
      */
     Graph(const Graph&);
     Graph& operator=(const Graph&);
-
-    /**
-     * The size of graph. Total count of requested nodes.
-     */
-    unsigned mNodesCount;
 
     /**
      * Count of instantiated nodes.
@@ -111,7 +112,7 @@ private:
     /**
      * Array of pointers to nodes.
      */
-    Node** mNodes;
+	std::vector<std::unique_ptr<Node>> mNodes;
 
     /**
      * Traverses the graph and assignes a value to each node.
@@ -122,7 +123,7 @@ private:
      */
     void traverse(
         unsigned index,
-        bool visitedNodes[],
+		BoolArray& visitedNodes,
         unsigned& edgeId
         );
 
@@ -135,7 +136,7 @@ private:
      */
     bool deleteLeafNodes(
         unsigned index,
-        bool visitedNodes[],
+		BoolArray& visitedNodes,
         unsigned& deletedNodesCount
         ) const;
 };

@@ -3,6 +3,8 @@
 
 #if defined(__MINGW32__)
 #define __MSVCRT_VERSION__ 0x900
+#elif defined(_MSC_VER)
+#include <cstdint>
 #endif
 
 #include <stdio.h>
@@ -12,6 +14,8 @@
 
 namespace external_sort
 {
+
+	;
 
 class FileWrapper {
 public:

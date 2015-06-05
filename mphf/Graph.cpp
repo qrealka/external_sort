@@ -4,35 +4,28 @@
  * @copyright VaL Doroshchuk
  * @license GNU GPL v2
  * @package Mphf
+ * 
+ * @date Jun 2015
+ * @fix compilation error by Dmitry Loginov <qrealka@gmail.com>
+ * @migrate to std::vector uniue_ptr by Dmitry Loginov <qrealka@gmail.com>
  */
 
 #include "Graph.hpp"
 #include <iostream>
-#include <cstring> // memset
 
 namespace NMphf
 {
 
 Graph::Graph(unsigned nodesCount) throw()
-    : mNodesCount(nodesCount)
-    , mCreatedNodesCount(0)
+    : mCreatedNodesCount(0)
+	, mNodes(nodesCount) // () means create null pointers.
 {
-    mNodes = new Node*[nodesCount](); // () means create null pointers.
 }
 
-Graph::~Graph()
-{
-    for (unsigned i = 0; i < mNodesCount; ++i)
-    {
-        delete mNodes[i];
-    }
-
-    delete [] mNodes;
-}
 
 unsigned Graph::getNodesCount() const
 {
-    return mNodesCount;
+	return mNodes.size();
 }
 
 unsigned Graph::getEdgesCount() const
@@ -45,41 +38,37 @@ bool Graph::connect(
     unsigned secondNodeIndex
     )
 {
-    if (firstNodeIndex >= mNodesCount ||
-        secondNodeIndex >= mNodesCount)
+	if (firstNodeIndex >= mNodes.size() ||
+		secondNodeIndex >= mNodes.size())
     {
         return false;
     }
 
-    Node* firstNode = mNodes[firstNodeIndex];
-    Node* secondNode = mNodes[secondNodeIndex];
-    if (firstNode == 0)
+	if (mNodes[firstNodeIndex] == nullptr)
     {
-        firstNode = new Node;
-        mNodes[firstNodeIndex] = firstNode;
+		mNodes[firstNodeIndex].reset(new Node);
         ++mCreatedNodesCount;
     }
-    if (secondNode == 0)
+	if (mNodes[secondNodeIndex] == nullptr)
     {
-        secondNode = new Node;
-        mNodes[secondNodeIndex] = secondNode;
+		mNodes[secondNodeIndex].reset(new Node);
         ++mCreatedNodesCount;
     }
 
-    firstNode->connectTo(secondNodeIndex);
-    secondNode->connectTo(firstNodeIndex);
+	mNodes[firstNodeIndex]->connectTo(secondNodeIndex);
+	mNodes[secondNodeIndex]->connectTo(firstNodeIndex);
 
     ++mEdgesCount;
 
     return true;
 }
 
-Node* Graph::getNode(unsigned index)
+std::unique_ptr<Node>& Graph::getNode(unsigned index)
 {
     return mNodes[index];
 }
 
-const Node* Graph::getNode(unsigned index) const
+const std::unique_ptr<Node>& Graph::getNode(unsigned index) const
 {
     return mNodes[index];
 }
@@ -92,12 +81,11 @@ bool Graph::isCyclic() const
         return false;
     }
 
-    bool visitedNodes[mNodesCount];
-    memset(&visitedNodes, false, mNodesCount);
+	BoolArray visitedNodes(mNodes.size(), false);
     
     // Total deleted leaf nodes.
     unsigned deletedNodesCount = 0;
-    for (unsigned i = 0; i < mNodesCount; ++i)
+    for (unsigned i = 0; i < mNodes.size(); ++i)
     {
         deleteLeafNodes(i, visitedNodes, deletedNodesCount);
     }
@@ -107,12 +95,12 @@ bool Graph::isCyclic() const
 
 bool Graph::deleteLeafNodes(
     unsigned index,
-    bool visitedNodes[],
+	BoolArray& visitedNodes,
     unsigned& deletedNodesCount
     ) const
 {
-    const Node* node = getNode(index);
-    if (node == 0 || visitedNodes[index])
+	const auto& node = getNode(index);
+    if (node == nullptr || visitedNodes[index])
     {
         return false;
     }
@@ -129,8 +117,7 @@ bool Graph::deleteLeafNodes(
             continue;
         }
 
-        const Node* nextNode = getNode(nextNodeIndex);
-        if (nextNode == 0 ||
+		if (getNode(nextNodeIndex) == nullptr ||
             deleteLeafNodes(nextNodeIndex, visitedNodes, deletedNodesCount))
         {
             ++deletedEdgesCount;
@@ -151,15 +138,13 @@ bool Graph::deleteLeafNodes(
 
 void Graph::calculateNodeValues()
 {
-    bool visitedNodes[mNodesCount];
-    memset(&visitedNodes, false, mNodesCount);
+	BoolArray visitedNodes(mNodes.size(), false);
 
     // Each edge will have an unigue id to avoid collisions.
     unsigned edgeId = 0;
     for (unsigned i = 0; i < getNodesCount(); ++i)
     {
-        Node* node = getNode(i);
-        if (node != 0 && !visitedNodes[i])
+		if (getNode(i) != nullptr && !visitedNodes[i])
         {
             traverse(i, visitedNodes, edgeId);
         }
@@ -168,14 +153,14 @@ void Graph::calculateNodeValues()
 
 void Graph::traverse(
     unsigned index,
-    bool visitedNodes[],
+	BoolArray& visitedNodes,
     unsigned& edgeId
     )
 {
     visitedNodes[index] = true;
 
-    Node* node = getNode(index);
-    if (node == 0)
+	auto& node = getNode(index);
+    if (node == nullptr)
     {
         return;
     }
@@ -184,8 +169,8 @@ void Graph::traverse(
     {
         unsigned nextNodeIndex = node->getNodeIndex(i);
 
-        Node* nextNode = getNode(nextNodeIndex);
-        if (nextNode == 0 || visitedNodes[nextNodeIndex])
+	    auto& nextNode = getNode(nextNodeIndex);
+        if (nextNode == nullptr || visitedNodes[nextNodeIndex])
         {
             continue;
         }
@@ -201,9 +186,9 @@ bool Graph::getEdgeId(
     unsigned secondNodeIndex,
     unsigned& result)
 {
-    Node* firstNode = firstNodeIndex < mNodesCount ? getNode(firstNodeIndex) : 0;
-    Node* secondNode = secondNodeIndex < mNodesCount ? getNode(secondNodeIndex) : 0;
-    if (firstNode == 0 || secondNode == 0)
+	auto firstNode = firstNodeIndex < mNodes.size() ? getNode(firstNodeIndex).get() : nullptr;
+	auto secondNode = secondNodeIndex < mNodes.size() ? getNode(secondNodeIndex).get() : nullptr;
+    if (firstNode == nullptr || secondNode == nullptr)
     {
         return false;
     }

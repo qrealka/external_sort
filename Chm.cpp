@@ -7,9 +7,8 @@
  */
 
 #include "Chm.hpp"
-#include "mpf/jenkins.hpp"
+#include "mphf/jenkins.hpp"
 #include <math.h> // ceil()
-#include <cstring> // strlen()
 #include <cstdlib> // rand()
 
 namespace NMphf
@@ -17,7 +16,7 @@ namespace NMphf
 
 Chm::Chm(double sizeFactor) throw()
     : mNodesCountFactor(sizeFactor)
-    , mGraph(0)
+    , mGraph(nullptr)
 {
     mHashSeeds[0] = mHashSeeds[1] = 0;
 }
@@ -29,7 +28,7 @@ Chm::~Chm()
 
 bool Chm::reset(unsigned len)
 {
-    if (mNodesCountFactor < 2)
+    if (mNodesCountFactor < 2.0)
     {
         mNodesCountFactor = 2.09;
     }
@@ -37,18 +36,17 @@ bool Chm::reset(unsigned len)
     delete mGraph;
     mGraph = new Graph(ceil(mNodesCountFactor * len));
 
-    return mGraph != 0;
+    return mGraph != nullptr;
 }
 
 void Chm::getNodeIndices(
-    const char* key,
+	const external_sort::RangeConstChar& key,
     unsigned& firstNodeIndex,
     unsigned& secondNodeIndex
     ) const
 {
-    unsigned len = strlen(key);
-    firstNodeIndex = NHash::jenkins(mHashSeeds[0], key, len) % mGraph->getNodesCount();
-    secondNodeIndex = NHash::jenkins(mHashSeeds[1], key, len) % mGraph->getNodesCount();
+    firstNodeIndex = NHash::jenkins(mHashSeeds[0], key.begin(), key.size()) % mGraph->getNodesCount();
+    secondNodeIndex = NHash::jenkins(mHashSeeds[1], key.begin(), key.size()) % mGraph->getNodesCount();
 
     if (firstNodeIndex == secondNodeIndex &&
         ++secondNodeIndex >= mGraph->getNodesCount())
@@ -57,7 +55,7 @@ void Chm::getNodeIndices(
     }
 }
 
-bool Chm::generate(const char* keys[], unsigned len)
+bool Chm::generate(const external_sort::RangeLines& keys, unsigned len)
 {
     bool result = false;
     for (unsigned attempt = 0; !result && reset(len) && attempt < 20; ++attempt)
@@ -67,7 +65,7 @@ bool Chm::generate(const char* keys[], unsigned len)
         for (unsigned i = 0; i < len; ++i)
         {
             unsigned firstNodeIndex, secondNodeIndex;
-            getNodeIndices(keys[i], firstNodeIndex, secondNodeIndex);
+			getNodeIndices(keys[i], firstNodeIndex, secondNodeIndex);
             mGraph->connect(firstNodeIndex, secondNodeIndex);
         }
 
@@ -82,7 +80,7 @@ bool Chm::generate(const char* keys[], unsigned len)
     return result;
 }
 
-bool Chm::search(const char* key, unsigned& result) const
+bool Chm::search(const external_sort::RangeConstChar& key, unsigned& result) const
 {
     unsigned firstNodeIndex, secondNodeIndex;
     getNodeIndices(key, firstNodeIndex, secondNodeIndex);

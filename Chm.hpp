@@ -9,7 +9,8 @@
 #ifndef MPHF_CHM
 #define MPHF_CHM
 
-#include "mpf/Graph.hpp"
+#include "mphf/Graph.hpp"
+#include "Range.h"
 
 namespace NMphf
 {
@@ -41,16 +42,17 @@ public:
      * @param Length of the array.
      * @return true in case of success.
      */
-    bool generate(const char* keys[], unsigned len);
+	bool generate(const external_sort::RangeLines& keys, unsigned len);
 
     /**
      * Queries the functions to find an unique identifier by a key.
      *
-     * @param Key to search.
+     * @param key to search string begin.
+	 * @param keyEnd to search string end.
      * @param[out] Buffer for the result.
      * @return true In case of success.
      */
-    bool search(const char* key, unsigned& result) const;
+	bool search(const external_sort::RangeConstChar& key, unsigned& result) const;
 
 private:
 
@@ -76,7 +78,7 @@ private:
      * @param[out] Index of second node. To make a connection to this node.
      */
     void getNodeIndices(
-        const char* key,
+		const external_sort::RangeConstChar& key,
         unsigned& firstNodeIndex,
         unsigned& secondNodeIndex) const;
 

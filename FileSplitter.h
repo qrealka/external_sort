@@ -3,8 +3,11 @@
 
 #include "FileWrapper.h"
 #include "Range.h"
-#include <string>
 #include <list>
+
+#if defined(_MSC_VER)
+#include <cstdint>
+#endif
 
 namespace external_sort
 {

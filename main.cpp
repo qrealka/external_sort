@@ -14,7 +14,7 @@ int main(int argc, const char* argv[]) {
     try {
         FileSplitter splitter(argv[1]);
 
-        const int64_t partSize = MAX_SORTED_SIZE * 1024LL * 1024LL * 1024LL;
+        const long long partSize = MAX_SORTED_SIZE * 1024LL * 1024LL * 1024LL;
         static_assert(MAX_SORTED_SIZE > 0, "Limit size of part of file canbnot be zero");
 
         std::cout << "Start file " << argv[1] << " splitting...\n";
