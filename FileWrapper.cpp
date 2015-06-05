@@ -61,6 +61,14 @@ FileWrapper::FileWrapper(const char *fileName, bool input)
     }
 }
 
+FileWrapper::FileWrapper(FileWrapper&& tmp)
+	: m_file(tmp.m_file)
+	, m_size(tmp.m_size)
+{
+	tmp.m_file = nullptr;
+	tmp.m_size = 0;
+}
+
 FileWrapper::~FileWrapper() {
     Close();
 }
@@ -79,11 +87,12 @@ size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSiz
     return 0;
 }
 
-void FileWrapper::Read(size_t offset, size_t size, std::string &out) const {
+void FileWrapper::Read(size_t offset, size_t size, std::vector<char> &out) const {
     assert(m_file);
 	CHECK_CONTRACT(offset || size, "Cannot read zero bytes. Wring arguments!");
 	CHECK_CONTRACT(out.capacity() >= size, "Cannot read to empty buffer");
 	CHECK_CONTRACT(std::fseek(m_file, offset, SEEK_SET), "Cannot seek to specified position in file");
+
 	const size_t bytes = std::fread(out.data(), sizeof(char), size, m_file);
 }
 

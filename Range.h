@@ -107,6 +107,7 @@ inline bool operator < (const Range<Iterator1T>& l, const Range<Iterator2T>& r)
     return std::lexicographical_compare(std::begin(l), std::end(l), std::begin(r), std::end(r));
 }
 
+typedef std::vector<char> CharBuffer;
 typedef Range<const char*> RangeConstChar;
 typedef std::vector<RangeConstChar> RangeLines;
 }

@@ -10,7 +10,7 @@ FileMerger::FileMerger(const char* outFileName)
 
 }
 
-void FileMerger::Merge(const FileSplitter &splitter) {
+void FileMerger::Merge(FileSplitter &splitter) {
 	m_outFile.Rewind();
 
 	for (;;) {
@@ -18,7 +18,7 @@ void FileMerger::Merge(const FileSplitter &splitter) {
 		if (minimum.empty())
 			break;
 
-		m_outFile.Write(RangeConstChar(minimum.begin(), minimum.end()));
+		m_outFile.Write(RangeConstChar(minimum.data(), minimum.data() + minimum.size()));
 	}
 
 	m_outFile.Close();

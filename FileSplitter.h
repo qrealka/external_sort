@@ -3,7 +3,7 @@
 
 #include "FileWrapper.h"
 #include "SortedFile.h"
-
+#include <list>
 #if defined(_MSC_VER)
 #include <cstdint>
 #endif
@@ -17,11 +17,11 @@ public:
     explicit FileSplitter(const char* inputFileName);
 
     void Split(int64_t splitSize);
-	std::string FindNextMinimum() const;
+    CharBuffer FindNextMinimum();
 
 private:
     FileWrapper m_file;
-    std::vector<SortedFile> m_parts;
+    std::list<SortedFile> m_parts;
 };
 
 } // external_sort

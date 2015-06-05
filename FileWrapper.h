@@ -19,6 +19,7 @@ class FileWrapper {
 public:
     FileWrapper(); // temporary file
     FileWrapper(const char* fileName, bool input);
+	FileWrapper(FileWrapper&& tmp);
     ~FileWrapper();
 
     size_t ReadChunk(int64_t offset, char* const chunk, size_t chunkSize);
@@ -28,7 +29,7 @@ public:
     int64_t GetFileSize() const;
 	void Rewind() const;
 
-    void Read(size_t offset, size_t size, std::string &out) const;
+    void Read(size_t offset, size_t size, std::vector<char> &out) const;
 
 private:
     FileWrapper(const FileWrapper&);

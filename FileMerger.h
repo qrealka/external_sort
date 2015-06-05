@@ -13,7 +13,7 @@ class FileMerger {
 public:
     explicit FileMerger(const char* outFileName);
 
-	void Merge(const FileSplitter &splitter);
+	void Merge(FileSplitter &splitter);
 
 private:
     FileWrapper m_outFile;
