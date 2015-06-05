@@ -1,14 +1,25 @@
 #include "FileWrapper.h"
 #include "ThrowError.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
+
+#if defined(_MSC_VER)
+
 #define stat64 _stat64
-#define status_t struct _stat64
+#define status_t _stat64
+#define fseek64 _fseeki64
+
+#elif defined(__MINGW32__)
+
+#define stat64 _stat64
+#define status_t __stat64
 #define fseek64 _fseeki64
 #else
-#define status_t struct stat64
+
+#define status_t stat64
+
 #endif
 
 namespace
@@ -41,11 +52,12 @@ FileWrapper::FileWrapper(const char *fileName, bool input)
     CHECK_CONTRACT(m_file, std::string("Cannot open file ") + fileName);
 
     if (input) {
-        status_t fileStat;
+        struct status_t fileStat;
         CHECK_CONTRACT(!stat64(fileName, &fileStat), std::string("Cannot get file size ") + fileName);
 
         m_size = fileStat.st_size;
-        CHECK_CONTRACT(m_size > 0 && MaxFileSize >= m_size, std::string("Too large file ") + fileName);
+		CHECK_CONTRACT(m_size > 0, std::string("Empty input file ") + fileName);
+		CHECK_CONTRACT(MaxFileSize >= m_size, std::string("Too large file ") + fileName);
     }
 }
 
@@ -92,7 +104,7 @@ void FileWrapper::CopyFileTo(FileWrapper& destFile) const {
     CHECK_CONTRACT(m_file && destFile.m_file, "Cannot copy closed files");
     rewind(m_file);
     rewind(destFile.m_file);
-    std::vector<char> buffer(std::min<int64_t>(m_size, FILE_CHUNK_SIZE * 1024 * 1024)); // can be int overflow on x64
+    std::vector<char> buffer(1 * 1024 * 1024); // 1MB
 
     while(!feof(m_file)) {
         size_t bytes = std::fread(buffer.data(), sizeof(char), buffer.size(), m_file);

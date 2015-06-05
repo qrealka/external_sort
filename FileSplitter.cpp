@@ -1,14 +1,16 @@
 #include "FileSplitter.h"
 #include "ThrowError.h"
+#include <limits>
 
 namespace
 {
 
-const size_t MaxFileChunkSize = FILE_CHUNK_SIZE  * 1024 * 1024;
 const size_t MaxStringLength = MAX_STRING_SIZE * 1024;
+const int64_t MaxMemoryAlloc = std::numeric_limits<int>::max();
 
 const char* GetLines(const char* begin, const char* end, external_sort::RangeLines& lines){
     const char* result = begin;
+    lines.clear();
 
     for (auto it = begin; it < end ; ++it) {
         CHECK_CONTRACT(it - begin <= MaxStringLength, "Too big string!");
@@ -33,47 +35,47 @@ namespace external_sort
 
 FileSplitter::FileSplitter(const char* inputFileName)
         : m_file(inputFileName, true)
-        , m_chunk(MaxFileChunkSize + MaxStringLength) // bound of chunk can break string
 {
-    static_assert(FILE_CHUNK_SIZE > 0, "Buffer for file i/o cannot be zero length");
     static_assert(MAX_STRING_SIZE > 0, "Limit of string length cannot be zero");
-    assert(MaxFileChunkSize > MaxStringLength);
 }
 
 void FileSplitter::Split(int64_t splitSize, OnSplitCallback onSplit) {
 
-    RangeLines lines;
-    char* buffer = m_chunk.data();
+    CHECK_CONTRACT(splitSize > MaxStringLength, "too low split size specified");
+    CHECK_CONTRACT(splitSize < (MaxMemoryAlloc - MaxStringLength), "too high split size specified");
 
     m_parts.clear();
     if (!m_file.GetFileSize())
         return;
 
+    const size_t chunkSize = static_cast<size_t>(splitSize);
+    std::vector<char>  chunk(chunkSize + MaxStringLength); // maximum size (in GB) of part of input file fol sorting
+    char* buffer = chunk.data();
+
     m_parts.emplace_back(""); // create TEMP file
+    RangeLines lines;
 
     for (int64_t position = 0;;) {
-        const size_t bufferLength = m_file.ReadChunk(position, buffer, MaxFileChunkSize);
+        const size_t bufferLength = m_file.ReadChunk(position, buffer, chunkSize);
         const char* chunkEnd = buffer + bufferLength;
-        const char* bufferEnd = GetLines(m_chunk.data(), chunkEnd, lines);
+        const char* bufferEnd = GetLines(chunk.data(), chunkEnd, lines);
 
-        assert(bufferEnd > m_chunk.data());
-        position += MaxFileChunkSize;
+        assert(bufferEnd > chunk.data());
+        position += splitSize;
 
         // EOF ?
-        if (bufferLength < MaxFileChunkSize || position >= m_file.GetFileSize()) {
+        if (bufferLength < splitSize || position >= m_file.GetFileSize()) {
             // put last line to result
             lines.emplace_back(bufferEnd, chunkEnd);
             onSplit(m_parts.back(), lines);
             break; // split done
         }
 
-        // part of string ('newline' not found) copy to head of buffer
-        buffer = std::copy_n(bufferEnd, chunkEnd - bufferEnd, m_chunk.data());
+        onSplit(m_parts.back(), lines);
+        m_parts.emplace_back(""); // new TEMP file (split part)
 
-        if (position >= m_parts.size() * splitSize) {
-            onSplit(m_parts.back(), lines);
-            m_parts.emplace_back(""); // new TEMP file (split part)
-        }
+        // part of string ('newline' not found) copy to head of buffer
+        buffer = std::copy_n(bufferEnd, chunkEnd - bufferEnd, chunk.data());
     }
 }
 

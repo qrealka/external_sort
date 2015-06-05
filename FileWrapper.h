@@ -1,8 +1,13 @@
 #ifndef EXTERNAL_SORT_FILEWRAPPER_H
 #define EXTERNAL_SORT_FILEWRAPPER_H
 
+#if defined(__MINGW32__)
+#define __MSVCRT_VERSION__ 0x900
+#endif
+
+#include <stdio.h>
 #include <vector>
-#include <cstdio> // FILE
+
 #include "Range.h"
 
 namespace external_sort

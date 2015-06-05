@@ -20,7 +20,6 @@ public:
 
 private:
     FileWrapper m_file;
-    std::vector<char> m_chunk;
     std::list<FileWrapper> m_parts;
 };
 

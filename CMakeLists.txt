@@ -1,12 +1,15 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.1)
 project(external_sort)
 
 # MAX_SORTED_SIZE       - maximum size (in GB) of part of input file fol sorting
-# FILE_CHUNK_SIZE       - size (in MB) of chunk data readed from input file
 # MAX_STRING_SIZE       - maximum size (in KB) of strings
 # MAX_INPUT_FILE_SIZE   - maximum input file size in GB
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if ( MSVC )
+    add_definitions(-Dint64_t=__int64)
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
 
 # specify maximum inpu file size in GB
 if (NOT DEFINED MAX_INPUT_FILE_SIZE)
@@ -17,16 +20,9 @@ endif()
 
 # specify maximum size part of input file in GB
 if (NOT DEFINED MAX_SORTED_SIZE)
-    add_definitions(-DMAX_SORTED_SIZE=16)
+    add_definitions(-DMAX_SORTED_SIZE=1)
 else()
     add_definitions(-DMAX_SORTED_SIZE=${MAX_SORTED_SIZE})
-endif()
-
-# file chunk size for reading in MB
-if (NOT DEFINED FILE_CHUNK_SIZE)
-    add_definitions(-DFILE_CHUNK_SIZE=8)
-else()
-    add_definitions(-DFILE_CHUNK_SIZE=${FILE_CHUNK_SIZE})
 endif()
 
 # limit std:string size in KB
@@ -36,5 +32,5 @@ else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()
 
-set(SOURCE_FILES main.cpp)
-add_executable(external_sort ${SOURCE_FILES} FileSplitter.cpp FileSplitter.h ThrowError.h Range.h FileWrapper.cpp FileWrapper.h FileMerger.cpp FileMerger.h)
+set(SOURCE_FILES main.cpp FileSplitter.cpp FileSplitter.h ThrowError.h Range.h FileWrapper.cpp FileWrapper.h FileMerger.cpp FileMerger.h)
+add_executable(external_sort ${SOURCE_FILES})
