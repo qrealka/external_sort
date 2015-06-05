@@ -39,16 +39,14 @@ public:
      * Generates hash functions.
      *
      * @param An array of keys.
-     * @param Length of the array.
      * @return true in case of success.
      */
-	bool generate(const external_sort::RangeLines& keys, unsigned len);
+	bool generate(const external_sort::RangeLines& keys);
 
     /**
      * Queries the functions to find an unique identifier by a key.
      *
      * @param key to search string begin.
-	 * @param keyEnd to search string end.
      * @param[out] Buffer for the result.
      * @return true In case of success.
      */

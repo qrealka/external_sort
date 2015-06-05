@@ -8,7 +8,6 @@
 #endif
 
 #include <stdio.h>
-
 #include "Range.h"
 
 namespace external_sort
@@ -18,7 +17,7 @@ namespace external_sort
 
 class FileWrapper {
 public:
-    explicit FileWrapper(const char*); // temporary file. input parameter not used
+    FileWrapper(); // temporary file
     FileWrapper(const char* fileName, bool input);
     ~FileWrapper();
 
@@ -28,6 +27,8 @@ public:
 
     int64_t GetFileSize() const;
 	void Rewind() const;
+
+    void Read(size_t offset, size_t size, std::string &out) const;
 
 private:
     FileWrapper(const FileWrapper&);

@@ -1,5 +1,6 @@
 #include "FileSplitter.h"
 #include "ThrowError.h"
+#include "Range.h"
 #include <limits>
 
 namespace
@@ -9,14 +10,14 @@ const size_t MaxStringLength = MAX_STRING_SIZE * 1024;
 const int64_t MaxMemoryAlloc = std::numeric_limits<int>::max();
 
 const char* GetLines(const char* begin, const char* end, external_sort::RangeLines& lines){
-    const char* result = begin;
+	auto result = begin;
     lines.clear();
 
     for (auto it = begin; it < end ; ++it) {
         CHECK_CONTRACT(it - begin <= MaxStringLength, "Too big string!");
 
         // CRLF windows hell
-        if ((it[0] == 13 && it[1] == 10) || (it[0] == 10 && it[1] == 13)) {
+        if (it[0] == 13 && it[1] == 10 || it[0] == 10 && it[1] == 13) {
             lines.emplace_back(begin, it);
             result = begin = it++ + 2;
         } else if (*it == 13) {
@@ -67,11 +68,11 @@ void FileSplitter::Split(int64_t splitSize) {
         if (bufferLength < splitSize || position >= m_file.GetFileSize()) {
             // put last line to result
             lines.emplace_back(bufferEnd, chunkEnd);
-			SortChunk(m_parts.back(), lines);
+			m_parts.back().SaveLines(lines);
             break; // split done
         }
 
-		SortChunk(m_parts.back(), lines);
+		m_parts.back().SaveLines(lines);
         m_parts.emplace_back(""); // new TEMP file (split part)
 
         // part of string ('newline' not found) copy to head of buffer
@@ -79,14 +80,7 @@ void FileSplitter::Split(int64_t splitSize) {
     }
 }
 
-void FileSplitter::SortChunk(FileWrapper& file, RangeLines& lines) {
-	std::sort(lines.begin(), lines.end());
-	std::for_each(lines.begin(), lines.end(), [&file](RangeConstChar& range){
-		file.Write(range);
-	});
-}
-
-const RangeConstChar& FileSplitter::FindNextMinimum() const {
+std::string FileSplitter::FindNextMinimum() const {
 	
 }
 

@@ -33,7 +33,7 @@ const int64_t MaxFileSize = MAX_INPUT_FILE_SIZE * 1024LL * 1024LL * 1024LL;
 namespace external_sort
 {
 
-FileWrapper::FileWrapper(const char*)
+FileWrapper::FileWrapper()
         : m_file(nullptr)
         , m_size(0)
 {
@@ -79,6 +79,14 @@ size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSiz
     return 0;
 }
 
+void FileWrapper::Read(size_t offset, size_t size, std::string &out) const {
+    assert(m_file);
+	CHECK_CONTRACT(offset || size, "Cannot read zero bytes. Wring arguments!");
+	CHECK_CONTRACT(out.capacity() >= size, "Cannot read to empty buffer");
+	CHECK_CONTRACT(std::fseek(m_file, offset, SEEK_SET), "Cannot seek to specified position in file");
+	const size_t bytes = std::fread(out.data(), sizeof(char), size, m_file);
+}
+
 
 void FileWrapper::Write(const RangeConstChar &range) {
     assert(m_file);
@@ -107,5 +115,6 @@ FileWrapper::FileWrapper(const external_sort::FileWrapper &wrapper) {
 void FileWrapper::operator=(const external_sort::FileWrapper &wrapper) {
     assert(false && "FileWrapper disable assign operator");
 }
+
 
 } // namespace

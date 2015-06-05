@@ -2,8 +2,7 @@
 #define EXTERNAL_SORT_FILESPLITTER_H
 
 #include "FileWrapper.h"
-#include "Range.h"
-#include <list>
+#include "SortedFile.h"
 
 #if defined(_MSC_VER)
 #include <cstdint>
@@ -18,14 +17,11 @@ public:
     explicit FileSplitter(const char* inputFileName);
 
     void Split(int64_t splitSize);
-	const RangeConstChar& FindNextMinimum() const;
-
-private:
-	void SortChunk(FileWrapper& file, RangeLines& lines);
+	std::string FindNextMinimum() const;
 
 private:
     FileWrapper m_file;
-    std::list<FileWrapper> m_parts;
+    std::vector<SortedFile> m_parts;
 };
 
 } // external_sort

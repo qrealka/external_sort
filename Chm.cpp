@@ -55,14 +55,14 @@ void Chm::getNodeIndices(
     }
 }
 
-bool Chm::generate(const external_sort::RangeLines& keys, unsigned len)
+bool Chm::generate(const external_sort::RangeLines& keys)
 {
     bool result = false;
-    for (unsigned attempt = 0; !result && reset(len) && attempt < 20; ++attempt)
+    for (unsigned attempt = 0; !result && reset(keys.size()) && attempt < 20; ++attempt)
     {
         mHashSeeds[0] = rand() % mGraph->getNodesCount();
         mHashSeeds[1] = rand() % mGraph->getNodesCount();
-        for (unsigned i = 0; i < len; ++i)
+        for (unsigned i = 0; i < keys.size(); ++i)
         {
             unsigned firstNodeIndex, secondNodeIndex;
 			getNodeIndices(keys[i], firstNodeIndex, secondNodeIndex);
