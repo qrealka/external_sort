@@ -75,6 +75,7 @@ void FileWrapper::Write(const RangeConstChar &range) {
     assert(m_file);
     CHECK_CONTRACT(range.size() == std::fwrite(range.begin(), sizeof(char), range.size(), m_file), "Cannot write to file");
     std::fputc('\n', m_file);
+    m_size += range.size() + 1; // CRLF windows ignore
 }
 
 int64_t FileWrapper::GetFileSize() const {
@@ -91,14 +92,14 @@ void FileWrapper::CopyFileTo(FileWrapper& destFile) const {
     CHECK_CONTRACT(m_file && destFile.m_file, "Cannot copy closed files");
     rewind(m_file);
     rewind(destFile.m_file);
-    std::vector<char> buffer(FILE_CHUNK_SIZE * 1024u * 1024u);
+    std::vector<char> buffer(std::min<int64_t>(m_size, FILE_CHUNK_SIZE * 1024 * 1024)); // can be int overflow on x64
 
-    for(;;) {
+    while(!feof(m_file)) {
         size_t bytes = std::fread(buffer.data(), sizeof(char), buffer.size(), m_file);
-        if (!bytes || feof(m_file))
+        if (!bytes)
             break;
-
-        CHECK_CONTRACT(bytes != std::fwrite(buffer.data(), sizeof(char), bytes, destFile.m_file), "Error write file") ;
+        std::fwrite(buffer.data(), sizeof(char), bytes, destFile.m_file);
+        CHECK_CONTRACT(!std::ferror(destFile.m_file), "Error write file");
     }
 }
 
