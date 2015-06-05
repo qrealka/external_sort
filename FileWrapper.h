@@ -8,7 +8,6 @@
 #endif
 
 #include <stdio.h>
-#include <vector>
 
 #include "Range.h"
 
@@ -24,11 +23,12 @@ public:
     ~FileWrapper();
 
     size_t ReadChunk(int64_t offset, char* const chunk, size_t chunkSize);
-    void CopyFileTo(FileWrapper& destFile) const;
-    void WriteChunk(size_t offset, const std::vector<char>& chunk);
     void Write(const RangeConstChar& range);
     void Close();
+
     int64_t GetFileSize() const;
+	void Rewind() const;
+
 private:
     FileWrapper(const FileWrapper&);
     void operator=(const FileWrapper&);

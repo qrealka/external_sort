@@ -39,7 +39,7 @@ FileSplitter::FileSplitter(const char* inputFileName)
     static_assert(MAX_STRING_SIZE > 0, "Limit of string length cannot be zero");
 }
 
-void FileSplitter::Split(int64_t splitSize, OnSplitCallback onSplit) {
+void FileSplitter::Split(int64_t splitSize) {
 
     CHECK_CONTRACT(splitSize > MaxStringLength, "too low split size specified");
     CHECK_CONTRACT(splitSize < (MaxMemoryAlloc - MaxStringLength), "too high split size specified");
@@ -48,15 +48,15 @@ void FileSplitter::Split(int64_t splitSize, OnSplitCallback onSplit) {
     if (!m_file.GetFileSize())
         return;
 
-    const size_t chunkSize = static_cast<size_t>(splitSize);
+    const auto chunkSize = static_cast<size_t>(splitSize);
     std::vector<char>  chunk(chunkSize + MaxStringLength); // maximum size (in GB) of part of input file fol sorting
-    char* buffer = chunk.data();
+	char* buffer = chunk.data();
 
     m_parts.emplace_back(""); // create TEMP file
     RangeLines lines;
 
     for (int64_t position = 0;;) {
-        const size_t bufferLength = m_file.ReadChunk(position, buffer, chunkSize);
+        const auto bufferLength = m_file.ReadChunk(position, buffer, chunkSize);
         const char* chunkEnd = buffer + bufferLength;
         const char* bufferEnd = GetLines(chunk.data(), chunkEnd, lines);
 
@@ -67,11 +67,11 @@ void FileSplitter::Split(int64_t splitSize, OnSplitCallback onSplit) {
         if (bufferLength < splitSize || position >= m_file.GetFileSize()) {
             // put last line to result
             lines.emplace_back(bufferEnd, chunkEnd);
-            onSplit(m_parts.back(), lines);
+			SortChunk(m_parts.back(), lines);
             break; // split done
         }
 
-        onSplit(m_parts.back(), lines);
+		SortChunk(m_parts.back(), lines);
         m_parts.emplace_back(""); // new TEMP file (split part)
 
         // part of string ('newline' not found) copy to head of buffer
@@ -79,8 +79,15 @@ void FileSplitter::Split(int64_t splitSize, OnSplitCallback onSplit) {
     }
 }
 
-const std::list<FileWrapper>& FileSplitter::GetSplitResults() const {
-    return m_parts;
+void FileSplitter::SortChunk(FileWrapper& file, RangeLines& lines) {
+	std::sort(lines.begin(), lines.end());
+	std::for_each(lines.begin(), lines.end(), [&file](RangeConstChar& range){
+		file.Write(range);
+	});
+}
+
+const RangeConstChar& FileSplitter::FindNextMinimum() const {
+	
 }
 
 } // external_sort

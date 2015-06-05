@@ -48,7 +48,7 @@ FileWrapper::FileWrapper(const char *fileName, bool input)
     static_assert(MAX_INPUT_FILE_SIZE > 0, "File size limit cannot be zero");
     CHECK_CONTRACT(fileName && fileName[0], "File name is empty");
 
-    m_file = std::fopen(fileName, input ? "rb" : "wb");
+    m_file = std::fopen(fileName, input ? "rb" : "ab");
     CHECK_CONTRACT(m_file, std::string("Cannot open file ") + fileName);
 
     if (input) {
@@ -71,7 +71,7 @@ size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSiz
     assert(offset >= 0);
 
     if (!fseek64(m_file, offset, SEEK_SET)) {
-        size_t bytes = std::fread(chunk, sizeof(char), chunkSize, m_file);
+        const size_t bytes = std::fread(chunk, sizeof(char), chunkSize, m_file);
         if (bytes)
             return bytes;
     }
@@ -79,19 +79,11 @@ size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSiz
     return 0;
 }
 
-void FileWrapper::WriteChunk(size_t offset, const std::vector<char> &chunk) {
-
-}
 
 void FileWrapper::Write(const RangeConstChar &range) {
     assert(m_file);
     CHECK_CONTRACT(range.size() == std::fwrite(range.begin(), sizeof(char), range.size(), m_file), "Cannot write to file");
     std::fputc('\n', m_file);
-    m_size += range.size() + 1; // CRLF windows ignore
-}
-
-int64_t FileWrapper::GetFileSize() const {
-    return m_size;
 }
 
 void FileWrapper::Close() {
@@ -100,19 +92,12 @@ void FileWrapper::Close() {
     m_file = nullptr;
 }
 
-void FileWrapper::CopyFileTo(FileWrapper& destFile) const {
-    CHECK_CONTRACT(m_file && destFile.m_file, "Cannot copy closed files");
-    rewind(m_file);
-    rewind(destFile.m_file);
-    std::vector<char> buffer(1 * 1024 * 1024); // 1MB
+int64_t FileWrapper::GetFileSize() const {
+	return m_size;
+}
 
-    while(!feof(m_file)) {
-        size_t bytes = std::fread(buffer.data(), sizeof(char), buffer.size(), m_file);
-        if (!bytes)
-            break;
-        std::fwrite(buffer.data(), sizeof(char), bytes, destFile.m_file);
-        CHECK_CONTRACT(!std::ferror(destFile.m_file), "Error write file");
-    }
+void FileWrapper::Rewind() const {
+	rewind(m_file);
 }
 
 FileWrapper::FileWrapper(const external_sort::FileWrapper &wrapper) {

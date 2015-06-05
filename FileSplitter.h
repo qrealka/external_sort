@@ -15,11 +15,13 @@ namespace external_sort
 class FileSplitter {
 
 public:
-    typedef void (*OnSplitCallback)(FileWrapper&, RangeLines&);
     explicit FileSplitter(const char* inputFileName);
 
-    void Split(int64_t splitSize, OnSplitCallback onSplit);
-    const std::list<FileWrapper>& GetSplitResults() const;
+    void Split(int64_t splitSize);
+	const RangeConstChar& FindNextMinimum() const;
+
+private:
+	void SortChunk(FileWrapper& file, RangeLines& lines);
 
 private:
     FileWrapper m_file;

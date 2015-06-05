@@ -1,4 +1,5 @@
 #include "FileMerger.h"
+#include "FileSplitter.h"
 
 namespace external_sort
 {
@@ -9,18 +10,19 @@ FileMerger::FileMerger(const char* outFileName)
 
 }
 
-void FileMerger::Merge(const std::list<external_sort::FileWrapper> &list) {
-    if (list.empty())
-        return;
+void FileMerger::Merge(const FileSplitter &splitter) {
+	m_outFile.Rewind();
 
-    if (list.size() == 1) {
-        list.front().CopyFileTo(m_outFile);
-        return;
-    }
+	for (;;) {
+		const auto& minimum = splitter.FindNextMinimum();
+		if (minimum.empty())
+			break;
+
+		m_outFile.Write(minimum);
+	}
+
+	m_outFile.Close();
 }
 
-void FileMerger::Final() {
-    m_outFile.Close();
-}
 
 }
