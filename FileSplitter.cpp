@@ -10,20 +10,27 @@ const size_t MaxStringLength = MAX_STRING_SIZE * 1024;
 const int64_t MaxMemoryAlloc = std::numeric_limits<int>::max();
 
 const char* GetLines(const char* begin, const char* end, external_sort::RangeLines& lines){
+	assert(begin && end);
+	assert(begin <= end);
+
 	auto result = begin;
     lines.clear();
 
-    for (auto it = begin; it < end ; ++it) {
+    for (auto it = begin; it < end ;) {
         CHECK_CONTRACT(it - begin <= MaxStringLength, "Too big string!");
 
         // CRLF windows hell
-        if (it[0] == 13 && it[1] == 10 || it[0] == 10 && it[1] == 13) {
-            lines.emplace_back(begin, it);
-            result = begin = it++ + 2;
-        } else if (*it == 13) {
-            lines.emplace_back(begin, it);
-            result = begin = it + 1;
-        }
+		if (*it == 13 || *it == 10) {
+			// ignore empty lines ??
+			if (begin != it)
+				lines.emplace_back(begin, it);
+
+			// skip many CRLFs
+			for (; (*it == 13 || *it == 10) && it < end; ++it);
+			begin = result = it;
+		} else {
+			++it;
+		}
     }
 
     return result > end ? end : result;
