@@ -40,7 +40,7 @@ const CharBuffer& SortedFile::GetFirst() const {
     if (m_first.size())
         return m_first;
 
-    const auto filePosition = m_offsets.begin()->second;
+    const auto filePosition = m_offsets.crbegin()->second; // CHM builf graph in DESC order
     const size_t lineSize = filePosition.second;
     CHECK_CONTRACT(lineSize > 0, "Found empty line in chunk");
 
@@ -56,7 +56,7 @@ bool SortedFile::Pop() {
     if (m_offsets.empty())
         return false;
 
-	m_offsets.erase(m_offsets.cbegin());
+	m_offsets.erase(--m_offsets.cend());
     return true;
 }
 

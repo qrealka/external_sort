@@ -48,7 +48,7 @@ FileWrapper::FileWrapper(const char *fileName, bool input)
     static_assert(MAX_INPUT_FILE_SIZE > 0, "File size limit cannot be zero");
     CHECK_CONTRACT(fileName && fileName[0], "File name is empty");
 
-    m_file = std::fopen(fileName, input ? "rb" : "ab");
+    m_file = std::fopen(fileName, input ? "rb" : "wb");
     CHECK_CONTRACT(m_file, std::string("Cannot open file ") + fileName);
 
     if (input) {
@@ -91,7 +91,7 @@ void FileWrapper::Read(size_t offset, size_t size, std::vector<char> &out) const
     assert(m_file);
 	CHECK_CONTRACT(offset || size, "Cannot read zero bytes. Wring arguments!");
 	CHECK_CONTRACT(out.capacity() >= size, "Cannot read to empty buffer");
-	CHECK_CONTRACT(std::fseek(m_file, offset, SEEK_SET), "Cannot seek to specified position in file");
+	CHECK_CONTRACT(!std::fseek(m_file, offset, SEEK_SET), "Cannot seek to specified position in file");
 
 	const size_t bytes = std::fread(out.data(), sizeof(char), size, m_file);
 }
