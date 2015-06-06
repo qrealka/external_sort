@@ -27,9 +27,7 @@ void SortedFile::SaveLines(const RangeLines& lines) {
         m_offsets.emplace(hash, std::make_pair(fileOffset, line.size()));
     });
 
-    //m_file.Rewind();
-    //m_file.Write(  RangeConstChar(lines.front().begin(), lines.back().end()) );
-    m_first.clear();
+     m_first.clear();
 }
 
 const CharBuffer& SortedFile::GetFirst(const FileWrapper& file) const {

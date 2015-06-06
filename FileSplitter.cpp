@@ -75,7 +75,8 @@ void FileSplitter::Split(size_t splitSize) {
         // EOF ?
         if (bufferLength < splitSize || position >= m_file.GetFileSize()) {
             // put last line to result
-            lines.emplace_back(bufferEnd, chunkEnd);
+			if (bufferEnd != chunkEnd)
+				lines.emplace_back(bufferEnd, chunkEnd);
 			m_parts.back().SaveLines(lines);
             break; // split done
         }
