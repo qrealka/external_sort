@@ -60,11 +60,12 @@ void FileSplitter::Split(int64_t splitSize) {
     std::vector<char>  chunk(chunkSize + MaxStringLength); // maximum size (in GB) of part of input file fol sorting
 	char* buffer = chunk.data();
 
-    m_parts.emplace_back(); // create TEMP file
+	int64_t position = 0LL;
+    m_parts.emplace_back(position); // create TEMP file
     RangeLines lines;
 
-    for (int64_t position = 0;;) {
-        const auto bufferLength = m_file.ReadChunk(position, buffer, chunkSize);
+    for (;;) {
+        const auto bufferLength = m_file.Read(position, buffer, chunkSize);
         const char* chunkEnd = buffer + bufferLength;
         const char* bufferEnd = GetLines(chunk.data(), chunkEnd, lines);
 
@@ -80,7 +81,7 @@ void FileSplitter::Split(int64_t splitSize) {
         }
 
 		m_parts.back().SaveLines(lines);
-        m_parts.emplace_back(); // new TEMP file (split part)
+        m_parts.emplace_back(position); // new TEMP file (split part)
 
         // part of string ('newline' not found) copy to head of buffer
         buffer = std::copy_n(bufferEnd, chunkEnd - bufferEnd, chunk.data());
@@ -91,14 +92,14 @@ CharBuffer FileSplitter::FindNextMinimum() {
     if (m_parts.empty())
         return CharBuffer();
 
-    const auto min = std::min_element(m_parts.begin(), m_parts.end(), [](const SortedFile& current, const SortedFile& smallest){
-        const auto curValue = current.GetFirst();
-        const auto minValue = smallest.GetFirst();
+    const auto min = std::min_element(m_parts.begin(), m_parts.end(), [this](const SortedFile& current, const SortedFile& smallest){
+		const auto curValue = current.GetFirst(m_file);
+		const auto minValue = smallest.GetFirst(m_file);
         return std::lexicographical_compare(curValue.begin(), curValue.end(),
                                             minValue.begin(), minValue.end());
     });
 
-    CharBuffer result = min->GetFirst();
+    CharBuffer result = min->GetFirst(m_file);
     min->Pop();
     return result;
 }

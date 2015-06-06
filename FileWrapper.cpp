@@ -73,7 +73,8 @@ FileWrapper::~FileWrapper() {
     Close();
 }
 
-size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSize) {
+
+size_t FileWrapper::Read(int64_t offset, char* const chunk, size_t chunkSize) const {
     assert(chunk && chunkSize);
     assert(m_file);
     assert(offset >= 0);
@@ -87,17 +88,8 @@ size_t FileWrapper::ReadChunk(int64_t offset, char* const chunk, size_t chunkSiz
     return 0;
 }
 
-void FileWrapper::Read(size_t offset, size_t size, std::vector<char> &out) const {
-    assert(m_file);
-	CHECK_CONTRACT(offset || size, "Cannot read zero bytes. Wring arguments!");
-	CHECK_CONTRACT(out.capacity() >= size, "Cannot read to empty buffer");
-	CHECK_CONTRACT(!std::fseek(m_file, offset, SEEK_SET), "Cannot seek to specified position in file");
 
-	const size_t bytes = std::fread(out.data(), sizeof(char), size, m_file);
-}
-
-
-void FileWrapper::Write(const RangeConstChar &range) {
+void FileWrapper::Write(const RangeConstChar &range) const {
     assert(m_file);
     CHECK_CONTRACT(range.size() == std::fwrite(range.begin(), sizeof(char), range.size(), m_file), "Cannot write to file");
     std::fputc('\n', m_file);

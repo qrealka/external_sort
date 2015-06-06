@@ -13,8 +13,6 @@
 namespace external_sort
 {
 
-	;
-
 class FileWrapper {
 public:
     FileWrapper(); // temporary file
@@ -22,14 +20,12 @@ public:
 	FileWrapper(FileWrapper&& tmp);
     ~FileWrapper();
 
-    size_t ReadChunk(int64_t offset, char* const chunk, size_t chunkSize);
-    void Write(const RangeConstChar& range);
+    size_t Read(int64_t offset, char* const chunk, size_t chunkSize) const;
+    void Write(const RangeConstChar& range) const;
     void Close();
 
     int64_t GetFileSize() const;
 	void Rewind() const;
-
-    void Read(size_t offset, size_t size, std::vector<char> &out) const;
 
 private:
     FileWrapper(const FileWrapper&);

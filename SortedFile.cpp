@@ -1,11 +1,12 @@
 #include "SortedFile.h"
+#include "FileWrapper.h"
 #include "ThrowError.h"
 #include "Chm.hpp"
 
 namespace external_sort
 {
 
-SortedFile::SortedFile() : m_file(), m_offsets()
+SortedFile::SortedFile(int64_t offset) : m_startChunkPosition(offset)
 {
 
 }
@@ -26,12 +27,12 @@ void SortedFile::SaveLines(const RangeLines& lines) {
         m_offsets.emplace(hash, std::make_pair(fileOffset, line.size()));
     });
 
-    m_file.Rewind();
-    m_file.Write(  RangeConstChar(lines.front().begin(), lines.back().end()) );
+    //m_file.Rewind();
+    //m_file.Write(  RangeConstChar(lines.front().begin(), lines.back().end()) );
     m_first.clear();
 }
 
-const CharBuffer& SortedFile::GetFirst() const {
+const CharBuffer& SortedFile::GetFirst(const FileWrapper& file) const {
     if (m_offsets.empty()) {
         m_first.clear();
         return m_first;
@@ -45,8 +46,12 @@ const CharBuffer& SortedFile::GetFirst() const {
     CHECK_CONTRACT(lineSize > 0, "Found empty line in chunk");
 
     m_first.resize(lineSize, 0);
-    m_file.Read(filePosition.first, filePosition.second, m_first);
+	const size_t bytes = file.Read(m_startChunkPosition + filePosition.first, m_first.data(), filePosition.second);
+	assert(bytes);
 
+	if (bytes < m_first.size()) {
+		m_first.erase(m_first.begin() + bytes, m_first.end());
+	}
     return m_first;
 }
 

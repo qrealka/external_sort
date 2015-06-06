@@ -1,25 +1,28 @@
 #ifndef EXTERNAL_SORT_FILEINDEX_H
 #define EXTERNAL_SORT_FILEINDEX_H
 
-#include "FileWrapper.h"
+#include "Range.h"
+
+#if defined(_MSC_VER)
+#include <cstdint>
+#endif
 #include <map>
 
 namespace external_sort
 {
 
+class FileWrapper;
+
 class SortedFile {
 public:
-	SortedFile();
+	explicit SortedFile(int64_t offset);
+
 	void SaveLines(const RangeLines& lines);
-	const CharBuffer& GetFirst() const;
+	const CharBuffer& GetFirst(const FileWrapper& file) const;
 	bool Pop();
 
 private:
-	SortedFile(const SortedFile&);
-	void operator=(const SortedFile&);
-
-private:
-	FileWrapper m_file;
+	int64_t m_startChunkPosition;
 	std::map<unsigned, std::pair<size_t, size_t> > m_offsets;
 	mutable CharBuffer m_first; // cache read file operation
 };

@@ -3,7 +3,7 @@
 
 #include "FileWrapper.h"
 #include "SortedFile.h"
-#include <list>
+
 #if defined(_MSC_VER)
 #include <cstdint>
 #endif
@@ -21,7 +21,7 @@ public:
 
 private:
     FileWrapper m_file;
-    std::list<SortedFile> m_parts;
+    std::vector<SortedFile> m_parts;
 };
 
 } // external_sort
