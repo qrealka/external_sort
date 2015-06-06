@@ -1,36 +1,35 @@
 #include "SortedFile.h"
 #include "FileWrapper.h"
 #include "ThrowError.h"
-#include "Chm.hpp"
+
+#include <algorithm>
 
 namespace external_sort
 {
 
-SortedFile::SortedFile(int64_t offset) : m_startChunkPosition(offset)
+SortedFile::SortedFile(const FileWrapper& file, int64_t offset) : m_file(file), m_startChunkPosition(offset)
 {
 
 }
 
-void SortedFile::SaveLines(const RangeLines& lines) {
+void SortedFile::SaveLines(RangeLines& lines) {
     if (lines.empty())
         return;
 
-    NMphf::Chm  hashes;
-    CHECK_CONTRACT(hashes.generate(lines), "Cannot generate preserve order hash keys");
-    const auto fileBegin = lines.front().begin();
+	const auto fileBegin = lines.front().begin();
 
-    std::for_each(lines.begin(), lines.end(), [&hashes, this, fileBegin](const RangeConstChar& line) {
-        unsigned hash;
-        CHECK_CONTRACT(hashes.search(line, hash), "Cannot find hash for string");
-
+	std::sort(lines.begin(), lines.end());
+    std::for_each(lines.begin(), lines.end(), [this, fileBegin](const RangeConstChar& line) {
+ 
         const auto fileOffset = line.begin() - fileBegin;
-        m_offsets.emplace(hash, std::make_pair(fileOffset, line.size()));
+        m_offsets.emplace_back(fileOffset, line.size());
     });
 
-     m_first.clear();
+	std::reverse(m_offsets.begin(), m_offsets.end());
+    m_first.clear();
 }
 
-const CharBuffer& SortedFile::GetFirst(const FileWrapper& file) const {
+const CharBuffer& SortedFile::GetFirst() const {
     if (m_offsets.empty()) {
         m_first.clear();
         return m_first;
@@ -39,12 +38,12 @@ const CharBuffer& SortedFile::GetFirst(const FileWrapper& file) const {
     if (m_first.size())
         return m_first;
 
-    const auto filePosition = m_offsets.cbegin()->second; 
+    const auto& filePosition = m_offsets.back(); 
     const size_t lineSize = filePosition.second;
     CHECK_CONTRACT(lineSize > 0, "Found empty line in chunk");
 
     m_first.resize(lineSize, 0);
-	const size_t bytes = file.Read(m_startChunkPosition + filePosition.first, m_first.data(), filePosition.second);
+	const size_t bytes = m_file.Read(m_startChunkPosition + filePosition.first, m_first.data(), filePosition.second);
 	assert(bytes);
 
 	if (bytes < m_first.size()) {
@@ -55,12 +54,8 @@ const CharBuffer& SortedFile::GetFirst(const FileWrapper& file) const {
 
 bool SortedFile::Pop() {
     m_first.clear();
-
-    if (m_offsets.empty())
-        return false;
-
-	m_offsets.erase(m_offsets.cbegin());
-    return true;
+	m_offsets.pop_back();
+	return !m_offsets.empty();
 }
 
 } // external_sort

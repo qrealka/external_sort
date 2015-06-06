@@ -7,21 +7,27 @@
 #if defined(_MSC_VER)
 #include <cstdint>
 #endif
+#include <list>
 
 namespace external_sort
 {
 
+class FileMerger;
+
 class FileSplitter {
 
 public:
+	typedef std::list<SortedFile>  SplitContainer;
+	typedef SplitContainer::iterator SplitIterator;
+
     explicit FileSplitter(const char* inputFileName);
 
     void Split(size_t splitSize);
-    CharBuffer FindNextMinimum();
+    void Merge(FileMerger& merger);
 
 private:
     FileWrapper m_file;
-    std::vector<SortedFile> m_parts;
+	SplitContainer m_parts;
 };
 
 } // external_sort

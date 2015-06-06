@@ -1,8 +1,11 @@
 #include "FileMerger.h"
 #include "FileSplitter.h"
 
+#include <set>
+
 namespace external_sort
 {
+
 
 FileMerger::FileMerger(const char* outFileName)
     : m_outFile(outFileName, false)
@@ -10,15 +13,28 @@ FileMerger::FileMerger(const char* outFileName)
 
 }
 
-void FileMerger::Merge(FileSplitter &splitter) {
+void FileMerger::Merge(FileSplitter::SplitIterator begin, FileSplitter::SplitIterator end) {
 	m_outFile.Rewind();
+	
+	struct Less {
+		bool operator()(const SortedFile* l, const SortedFile* r) {
+			return l->GetFirst() < r->GetFirst();
+		}
+	};
 
-	for (;;) {
-		const auto minimum = splitter.FindNextMinimum();
-		if (minimum.empty())
-			break;
+	std::set<SortedFile*, Less> splits;
+	for (; begin != end; ++begin) {
+		splits.insert(&*begin);
+	}
 
-		m_outFile.Write(RangeConstChar(minimum.data(), minimum.data() + minimum.size()));
+	while (!splits.empty()) {
+		SortedFile* minimum = *splits.cbegin();
+
+		const auto& top = minimum->GetFirst();
+		m_outFile.Write(RangeConstChar(top.data(), top.data() + top.size()));
+
+		if (!minimum->Pop())
+			splits.erase(splits.cbegin());
 	}
 
 	m_outFile.Close();

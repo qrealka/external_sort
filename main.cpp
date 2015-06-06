@@ -13,6 +13,7 @@ int main(int argc, const char* argv[]) {
 
     try {
         FileSplitter splitter(argv[1]);
+		FileMerger merger(argv[2]);
 
         static_assert(MAX_SORTED_SIZE > 0, "Limit size of part of file canbnot be zero");
         static_assert(MAX_SORTED_SIZE <= 1024, "Limit size of part of file too big");
@@ -22,8 +23,7 @@ int main(int argc, const char* argv[]) {
         splitter.Split(partSize);
 
         std::cout << "Start merge files to destination " << argv[2] << std::endl;
-        FileMerger merger(argv[2]);
-        merger.Merge(splitter);
+		splitter.Merge(merger);
 
         std::cout << "Finished\n";
         return 0;

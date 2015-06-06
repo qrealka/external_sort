@@ -1,7 +1,9 @@
 #include "FileSplitter.h"
 #include "ThrowError.h"
 #include "Range.h"
+#include "FileMerger.h"
 #include <limits>
+#include <set>
 
 namespace
 {
@@ -61,7 +63,7 @@ void FileSplitter::Split(size_t splitSize) {
 	char* buffer = chunk.data();
 
 	int64_t position = 0LL;
-    m_parts.emplace_back(position); // create TEMP file
+    m_parts.emplace_back(m_file, position); // create TEMP file
     RangeLines lines;
 
     for (;;) {
@@ -82,27 +84,17 @@ void FileSplitter::Split(size_t splitSize) {
         }
 
 		m_parts.back().SaveLines(lines);
-        m_parts.emplace_back(position); // new TEMP file (split part)
+        m_parts.emplace_back(m_file, position); // new TEMP file (split part)
 
         // part of string ('newline' not found) copy to head of buffer
         buffer = std::copy_n(bufferEnd, chunkEnd - bufferEnd, chunk.data());
     }
 }
 
-CharBuffer FileSplitter::FindNextMinimum() {
-    if (m_parts.empty())
-        return CharBuffer();
-
-    const auto min = std::min_element(m_parts.begin(), m_parts.end(), [this](const SortedFile& current, const SortedFile& smallest){
-		const auto curValue = current.GetFirst(m_file);
-		const auto minValue = smallest.GetFirst(m_file);
-        return std::lexicographical_compare(curValue.begin(), curValue.end(),
-                                            minValue.begin(), minValue.end());
-    });
-
-    CharBuffer result = min->GetFirst(m_file);
-    min->Pop();
-    return result;
+void FileSplitter::Merge(FileMerger& merger) {
+	if (!m_parts.empty())
+		merger.Merge(m_parts.begin(), m_parts.end());
+	
 }
 
 } // external_sort

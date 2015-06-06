@@ -30,6 +30,5 @@ else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()
 
-aux_source_directory(mphf SRC_HASH)
-set(SOURCE_FILES main.cpp FileSplitter.cpp FileSplitter.h ThrowError.h Range.h FileWrapper.cpp FileWrapper.h FileMerger.cpp FileMerger.h SortedFile.cpp SortedFile.h Chm.hpp Chm.cpp  ${SRC_HASH})
+set(SOURCE_FILES main.cpp FileSplitter.cpp FileSplitter.h ThrowError.h Range.h FileWrapper.cpp FileWrapper.h FileMerger.cpp FileMerger.h SortedFile.cpp SortedFile.h)
 add_executable(external_sort ${SOURCE_FILES})

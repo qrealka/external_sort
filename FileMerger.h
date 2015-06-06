@@ -2,18 +2,17 @@
 #define EXTERNAL_SORT_FILEMERGER_H
 
 #include "FileWrapper.h"
+#include "FileSplitter.h"
 
 namespace external_sort
 {
-
-class FileSplitter;
 
 class FileMerger {
 
 public:
     explicit FileMerger(const char* outFileName);
 
-	void Merge(FileSplitter &splitter);
+	void Merge(FileSplitter::SplitIterator begin, FileSplitter::SplitIterator end);
 
 private:
     FileWrapper m_outFile;
