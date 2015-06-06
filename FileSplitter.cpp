@@ -47,7 +47,7 @@ FileSplitter::FileSplitter(const char* inputFileName)
     static_assert(MAX_STRING_SIZE > 0, "Limit of string length cannot be zero");
 }
 
-void FileSplitter::Split(int64_t splitSize) {
+void FileSplitter::Split(size_t splitSize) {
 
     CHECK_CONTRACT(splitSize > MaxStringLength, "too low split size specified");
     CHECK_CONTRACT(splitSize < (MaxMemoryAlloc - MaxStringLength), "too high split size specified");
@@ -56,7 +56,7 @@ void FileSplitter::Split(int64_t splitSize) {
     if (!m_file.GetFileSize())
         return;
 
-    const auto chunkSize = static_cast<size_t>(splitSize);
+    const auto chunkSize = splitSize;
     std::vector<char>  chunk(chunkSize + MaxStringLength); // maximum size (in GB) of part of input file fol sorting
 	char* buffer = chunk.data();
 

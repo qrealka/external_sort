@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8)
 project(external_sort)
 
-# MAX_SORTED_SIZE       - maximum size (in GB) of part of input file fol sorting
+# MAX_SORTED_SIZE       - maximum size (in MB) of part of input file fol sorting
 # MAX_STRING_SIZE       - maximum size (in KB) of strings
 # MAX_INPUT_FILE_SIZE   - maximum input file size in GB
 
@@ -16,9 +16,9 @@ else()
     add_definitions(-DMAX_INPUT_FILE_SIZE=${MAX_INPUT_FILE_SIZE})
 endif()
 
-# specify maximum size part of input file in GB
+# specify maximum size part of input file in MB
 if (NOT DEFINED MAX_SORTED_SIZE)
-    add_definitions(-DMAX_SORTED_SIZE=1)
+    add_definitions(-DMAX_SORTED_SIZE=512)
 else()
     add_definitions(-DMAX_SORTED_SIZE=${MAX_SORTED_SIZE})
 endif()

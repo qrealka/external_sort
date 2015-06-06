@@ -16,7 +16,7 @@ class FileSplitter {
 public:
     explicit FileSplitter(const char* inputFileName);
 
-    void Split(int64_t splitSize);
+    void Split(size_t splitSize);
     CharBuffer FindNextMinimum();
 
 private:
