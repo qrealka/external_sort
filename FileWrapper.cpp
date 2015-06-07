@@ -19,7 +19,7 @@
 #else
 
 #define status_t stat64
-
+#define fseek64 lseek64
 #endif
 
 namespace
