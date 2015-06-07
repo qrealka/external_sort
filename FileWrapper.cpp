@@ -1,6 +1,6 @@
 #include "FileWrapper.h"
 #include "ThrowError.h"
-#define _LARGEFILE64_SOURCE
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -19,7 +19,7 @@
 #else
 #include <unistd.h>
 #define status_t stat64
-#define fseek64 lseek64
+#define fseek64(file,ofs,from) lseek64(file->_file, ofs, from)
 #endif
 
 namespace
