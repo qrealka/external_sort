@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]) {
         FileSplitter splitter(argv[1]);
 		FileWrapper outFile(argv[2], false);
 
-        static_assert(MAX_SORTED_SIZE > 0, "Limit size of part of file canbnot be zero");
+        static_assert(MAX_SORTED_SIZE > 0, "Limit size of part of file can't be zero");
         static_assert(MAX_SORTED_SIZE <= 1024, "Limit size of part of file too big");
 #ifdef DEBUG_MERGE
 		const auto partSize = 1024;

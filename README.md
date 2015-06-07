@@ -1,5 +1,5 @@
 # External Sort
-Simple external sort huge file implemetation.
+Simple external sort huge file implementation.
 
 # Compilers:
 * VisualStudio 2010+
