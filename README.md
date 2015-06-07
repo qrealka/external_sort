@@ -1,5 +1,5 @@
-# external_sort
-Simple external sort huge file.
+# External Sort
+Simple external sort huge file implemetation.
 
 # Compilers:
 * VisualStudio 2010+
@@ -8,6 +8,6 @@ Simple external sort huge file.
 
 # Build instructions
 1. mkdir build && cd build
-2. cmake .. or cmake -G"Visual Studio <version>"
+2. cmake .. or cmake -G"Visual Studio <version>" ..
 3. use generated files
 
