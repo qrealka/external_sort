@@ -15,7 +15,6 @@ namespace external_sort
 
 class FileWrapper {
 public:
-    FileWrapper(); // temporary file
     FileWrapper(const char* fileName, bool input);
 	FileWrapper(FileWrapper&& tmp);
     ~FileWrapper();

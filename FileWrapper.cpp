@@ -9,14 +9,18 @@
 
 #define stat64 _stat64
 #define status_t _stat64
+#define fseek64 _fseeki64
 
 #elif defined(__MINGW32__)
 
 #define stat64 _stat64
 #define status_t __stat64
+#define fseek64 _fseeki64
+
 #else
 #include <unistd.h>
 #define status_t stat64
+#define fseek64 fseeko
 #endif
 
 namespace
@@ -29,14 +33,6 @@ const int64_t MaxFileSize = MAX_INPUT_FILE_SIZE * 1024LL * 1024LL * 1024LL;
 
 namespace external_sort
 {
-
-FileWrapper::FileWrapper()
-        : m_file(nullptr)
-        , m_size(0)
-{
-    m_file = std::tmpfile();
-    CHECK_CONTRACT(m_file, "Cannot create temporary file");
-}
 
 FileWrapper::FileWrapper(const char *fileName, bool input)
         : m_file(nullptr)
@@ -75,10 +71,9 @@ size_t FileWrapper::Read(int64_t offset, char* const chunk, size_t chunkSize) co
     assert(chunk && chunkSize);
     assert(m_file);
     assert(offset >= 0);
-	const fpos_t position(offset);
 
-	
-	if (!fsetpos(m_file, &position)) {
+
+	if (!fseek64(m_file, offset, SEEK_SET)) {
         const size_t bytes = std::fread(chunk, sizeof(char), chunkSize, m_file);
         if (bytes)
             return bytes;
