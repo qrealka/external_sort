@@ -2,21 +2,41 @@
 #define EXTERNAL_SORT_FILEMERGER_H
 
 #include "FileWrapper.h"
-#include "FileSplitter.h"
+#include <set>
+#include <iterator>
 
 namespace external_sort
 {
 
-class FileMerger {
+template<typename Iterator>
+void MergeSortedTo(Iterator begin, Iterator end, FileWrapper& outFile)
+{
+	typedef typename std::iterator_traits<Iterator>::pointer SortedFilePtr;
 
-public:
-    explicit FileMerger(const char* outFileName);
+	outFile.Rewind();
+	struct Less {
+		bool operator()(const SortedFilePtr l, const SortedFilePtr r) {
+			return l->GetFirst() < r->GetFirst();
+		}
+	};
 
-	void Merge(FileSplitter::SplitIterator begin, FileSplitter::SplitIterator end);
+	std::set<SortedFilePtr, Less> splits;
+	for (; begin != end; ++begin) {
+		splits.insert(&*begin);
+	}
 
-private:
-    FileWrapper m_outFile;
-};
+	while (!splits.empty()) {
+		SortedFilePtr minimum = *splits.cbegin();
+
+		const auto& top = minimum->GetFirst();
+		outFile.Write(RangeConstChar(top.data(), top.data() + top.size()));
+
+		if (!minimum->Pop())
+			splits.erase(splits.cbegin());
+	}
+
+	outFile.Close();
+}
 
 }
 

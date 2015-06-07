@@ -49,7 +49,7 @@ FileSplitter::FileSplitter(const char* inputFileName)
     static_assert(MAX_STRING_SIZE > 0, "Limit of string length cannot be zero");
 }
 
-void FileSplitter::Split(size_t splitSize) {
+void FileSplitter::Split(const size_t splitSize, AfterSplitCallback onAfterSplit) {
 
     CHECK_CONTRACT(splitSize > MaxStringLength, "too low split size specified");
     CHECK_CONTRACT(splitSize < (MaxMemoryAlloc - MaxStringLength), "too high split size specified");
@@ -89,12 +89,10 @@ void FileSplitter::Split(size_t splitSize) {
         // part of string ('newline' not found) copy to head of buffer
         buffer = std::copy_n(bufferEnd, chunkEnd - bufferEnd, chunk.data());
     }
+
+	if (!m_parts.empty())
+		onAfterSplit(m_parts.begin(), m_parts.end());
 }
 
-void FileSplitter::Merge(FileMerger& merger) {
-	if (!m_parts.empty())
-		merger.Merge(m_parts.begin(), m_parts.end());
-	
-}
 
 } // external_sort
