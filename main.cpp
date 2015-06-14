@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]) {
         static_assert(MAX_SORTED_SIZE > 0, "Limit size of part of file can't be zero");
         static_assert(MAX_SORTED_SIZE <= 1024, "Limit size of part of file too big");
 #ifdef DEBUG_MERGE
-		const auto partSize = 1024;
+		const auto partSize = 300;
 #else
 		const auto partSize = MAX_SORTED_SIZE * 1024L * 1024L;
 #endif

@@ -21,7 +21,7 @@ public:
 	typedef std::function<void(SplitIterator, SplitIterator)> AfterSplitCallback;
 
     explicit FileSplitter(const char* inputFileName);
-
+	void SplitImpl(const size_t splitSize);
 	void Split(const size_t splitSize, AfterSplitCallback onAfterSplit);
 
 private:

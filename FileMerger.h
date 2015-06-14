@@ -26,13 +26,14 @@ void MergeSortedTo(Iterator begin, Iterator end, FileWrapper& outFile)
 	}
 
 	while (!splits.empty()) {
-		SortedFilePtr minimum = *splits.cbegin();
+		const auto minimum = *splits.cbegin();
 
 		const auto& top = minimum->GetFirst();
 		outFile.Write(RangeConstChar(top.data(), top.data() + top.size()));
-
-		if (!minimum->Pop())
-			splits.erase(splits.cbegin());
+		
+		splits.erase(splits.cbegin());
+		if (minimum->Pop())
+			splits.insert(minimum);
 	}
 
 	outFile.Close();

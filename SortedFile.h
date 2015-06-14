@@ -7,7 +7,7 @@
 #if defined(_MSC_VER)
 #include <cstdint>
 #endif
-#include <vector>
+#include <list>
 
 namespace external_sort
 {
@@ -27,9 +27,12 @@ private:
 	void operator=(const SortedFile&);
 
 private:
+	typedef std::pair<size_t, uint16_t> OffsetType;
+	typedef std::list<OffsetType> OffsetsList;
+
 	const FileWrapper&  m_file;
 	int64_t m_startChunkPosition;
-	std::vector<std::pair<size_t, size_t> > m_offsets; 
+	OffsetsList m_offsets;
 	mutable CharBuffer m_first; // cache read file operation
 };
 
