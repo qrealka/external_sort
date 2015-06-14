@@ -1,5 +1,5 @@
 # External Sort
-Simple external sort huge file implementation.
+Simple implementation of external sort huge text file. String delimiter is CR or CRLF symbol
 
 # Compilers:
 * VisualStudio 2010+

@@ -11,7 +11,7 @@ if (NOT MSVC)
     add_definitions(-D_FILE_OFFSET_BITS=64)
 endif()
 
-# specify maximum inpu file size in GB
+# specify maximum input file size in GB
 if (NOT DEFINED MAX_INPUT_FILE_SIZE)
     add_definitions(-DMAX_INPUT_FILE_SIZE=200)
 else()
@@ -20,14 +20,14 @@ endif()
 
 # specify maximum size part of input file in MB
 if (NOT DEFINED MAX_SORTED_SIZE)
-    add_definitions(-DMAX_SORTED_SIZE=512)
+    add_definitions(-DMAX_SORTED_SIZE=1024)
 else()
     add_definitions(-DMAX_SORTED_SIZE=${MAX_SORTED_SIZE})
 endif()
 
 # limit std:string size in KB
 if (NOT DEFINED MAX_STRING_SIZE)
-    add_definitions(-DMAX_STRING_SIZE=64)
+    add_definitions(-DMAX_STRING_SIZE=1024)
 else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()

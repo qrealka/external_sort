@@ -34,6 +34,14 @@ const int64_t MaxFileSize = MAX_INPUT_FILE_SIZE * 1024LL * 1024LL * 1024LL;
 namespace external_sort
 {
 
+FileWrapper::FileWrapper()
+	: m_file(nullptr)
+	, m_size(0)
+{
+	m_file = std::tmpfile();
+	CHECK_CONTRACT(m_file, "Cannot create temporary file");
+}
+	
 FileWrapper::FileWrapper(const char *fileName, bool input)
         : m_file(nullptr)
         , m_size(0)
@@ -103,6 +111,16 @@ void FileWrapper::Rewind() const {
 	rewind(m_file);
 }
 
+void FileWrapper::WriteNumbers(size_t numbers[]) const {
+    assert(m_file);
+    CHECK_CONTRACT(sizeof(numbers)/sizeof(size_t) == std::fwrite(numbers, sizeof(size_t), sizeof(numbers)/sizeof(size_t), m_file), "Cannot write numbers to file");
+}
+
+void FileWrapper::ReadNumbers(size_t numbers[]) const {
+    assert(m_file);
+    CHECK_CONTRACT(sizeof(numbers)/sizeof(size_t) == fread(numbers, sizeof(size_t), sizeof(numbers)/sizeof(size_t), m_file), "Cannot read numbers from file");
+}
+
 FileWrapper::FileWrapper(const external_sort::FileWrapper &wrapper) {
     assert(false && "FileWrapper disable copy constructor");
 }
@@ -111,5 +129,7 @@ void FileWrapper::operator=(const external_sort::FileWrapper &wrapper) {
     assert(false && "FileWrapper disable assign operator");
 }
 
-
+bool FileWrapper::IeEOF() const {
+    return feof(m_file);
+}
 } // namespace

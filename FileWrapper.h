@@ -15,7 +15,8 @@ namespace external_sort
 
 class FileWrapper {
 public:
-    FileWrapper(const char* fileName, bool input);
+	FileWrapper(); // temporary file
+	FileWrapper(const char* fileName, bool input);
 	FileWrapper(FileWrapper&& tmp);
     ~FileWrapper();
 
@@ -25,6 +26,10 @@ public:
 
     int64_t GetFileSize() const;
 	void Rewind() const;
+    bool IeEOF() const;
+
+    void WriteNumbers(size_t numbers[]) const;
+    void ReadNumbers(size_t numbers[]) const;
 
 private:
     FileWrapper(const FileWrapper&);

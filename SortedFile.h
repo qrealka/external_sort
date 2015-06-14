@@ -7,7 +7,6 @@
 #if defined(_MSC_VER)
 #include <cstdint>
 #endif
-#include <list>
 
 namespace external_sort
 {
@@ -16,7 +15,7 @@ class FileWrapper;
 
 class SortedFile {
 public:
-	explicit SortedFile(const FileWrapper& file, int64_t offset);
+    SortedFile(const FileWrapper& file, int64_t offset);
 
 	void SaveLines(RangeLines& lines);
 	const CharBuffer& GetFirst() const;
@@ -27,12 +26,10 @@ private:
 	void operator=(const SortedFile&);
 
 private:
-	typedef std::pair<size_t, uint16_t> OffsetType;
-	typedef std::list<OffsetType> OffsetsList;
-
-	const FileWrapper&  m_file;
+	FileWrapper m_tempFile;
+	size_t m_linesCount;
+	const FileWrapper& m_inputFile;
 	int64_t m_startChunkPosition;
-	OffsetsList m_offsets;
 	mutable CharBuffer m_first; // cache read file operation
 };
 

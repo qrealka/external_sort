@@ -1,13 +1,14 @@
 #include "SortedFile.h"
-#include "FileWrapper.h"
 #include "ThrowError.h"
-
-#include <algorithm>
 
 namespace external_sort
 {
 
-SortedFile::SortedFile(const FileWrapper& file, int64_t offset) : m_file(file), m_startChunkPosition(offset)
+SortedFile::SortedFile(const FileWrapper& file, int64_t offset)
+        : m_tempFile()
+        , m_linesCount(0)
+        , m_inputFile(file)
+        , m_startChunkPosition(offset)
 {
 
 }
@@ -21,19 +22,22 @@ void SortedFile::SaveLines(RangeLines& lines) {
 	std::sort(lines.begin(), lines.end());
     std::for_each(lines.begin(), lines.end(), [this, fileBegin](const RangeConstChar& line) {
  
-        const auto fileOffset = line.begin() - fileBegin;
+        const size_t fileOffset = line.begin() - fileBegin;
 #ifdef DEBUG_MERGE
 		assert(line.size() == DEBUG_MERGE);
 #endif
-        m_offsets.emplace_back(fileOffset, line.size());
+        size_t pair[] = {fileOffset, line.size()};
+        m_tempFile.WriteNumbers(pair);
+
     });
 
-	//std::reverse(m_offsets.begin(), m_offsets.end());
+    m_linesCount = lines.size();
     m_first.clear();
+    m_tempFile.Rewind();
 }
 
 const CharBuffer& SortedFile::GetFirst() const {
-    if (m_offsets.empty()) {
+    if (!m_linesCount) {
         m_first.clear();
         return m_first;
     }
@@ -46,8 +50,9 @@ const CharBuffer& SortedFile::GetFirst() const {
 		return m_first;
 	}
 
-    const auto& filePosition = m_offsets.front(); 
-    const uint16_t lineSize = filePosition.second;
+    size_t filePosition[] = {0,0};
+    m_tempFile.ReadNumbers(filePosition);
+    const uint16_t lineSize = filePosition[1];
     CHECK_CONTRACT(lineSize > 0, "Found empty line in chunk");
 
 #ifdef DEBUG_MERGE
@@ -55,7 +60,7 @@ const CharBuffer& SortedFile::GetFirst() const {
 #endif
 
     m_first.resize(lineSize, 0);
-	const size_t bytes = m_file.Read(m_startChunkPosition + filePosition.first, m_first.data(), filePosition.second);
+	const size_t bytes = m_inputFile.Read(m_startChunkPosition + filePosition[0], m_first.data(), filePosition[1]);
 #ifdef DEBUG_MERGE
 	assert(bytes == DEBUG_MERGE);
 #else
@@ -70,8 +75,11 @@ const CharBuffer& SortedFile::GetFirst() const {
 
 bool SortedFile::Pop() {
     m_first.clear();
-	m_offsets.pop_front();
-	return !m_offsets.empty();
+    if (m_tempFile.IeEOF()) {
+        m_tempFile.Close();
+        return true;
+    }
+	return false;
 }
 
 } // external_sort
