@@ -20,7 +20,7 @@ void MergeSortedTo(Iterator begin, Iterator end, FileWrapper& outFile)
 		}
 	};
 
-	std::set<SortedFilePtr, Less> splits;
+	std::multiset<SortedFilePtr, Less> splits;
 	for (; begin != end; ++begin) {
 		splits.insert(&*begin);
 	}
@@ -32,7 +32,7 @@ void MergeSortedTo(Iterator begin, Iterator end, FileWrapper& outFile)
 		outFile.Write(RangeConstChar(top.data(), top.data() + top.size()));
 		
 		splits.erase(splits.cbegin());
-		if (minimum->Pop())
+		if (minimum->Pop() && !top.empty())
 			splits.insert(minimum);
 	}
 

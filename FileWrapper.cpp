@@ -93,6 +93,7 @@ size_t FileWrapper::Read(int64_t offset, char* const chunk, size_t chunkSize) co
 
 void FileWrapper::Write(const RangeConstChar &range) const {
     assert(m_file);
+	assert(!range.empty());
     CHECK_CONTRACT(range.size() == std::fwrite(range.begin(), sizeof(char), range.size(), m_file), "Cannot write to file");
     std::fputc('\n', m_file);
 }

@@ -53,6 +53,7 @@ const CharBuffer& SortedFile::GetFirst() const {
     size_t filePosition[] = {0,0};
 	if (!m_tempFile.ReadNumbers(filePosition, sizeof(filePosition) / sizeof(size_t)))
 	{
+		assert(m_linesCount);
 		m_first.clear();
 		return m_first;
 	}
