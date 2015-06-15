@@ -26,10 +26,10 @@ public:
 
     int64_t GetFileSize() const;
 	void Rewind() const;
-    bool IeEOF() const;
+	bool IsEOF() const;
 
-    void WriteNumbers(size_t numbers[]) const;
-    void ReadNumbers(size_t numbers[]) const;
+	void WriteNumbers(size_t numbers[], size_t count) const;
+	bool ReadNumbers(size_t numbers[], size_t count) const;
 
 private:
     FileWrapper(const FileWrapper&);

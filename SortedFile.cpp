@@ -27,7 +27,7 @@ void SortedFile::SaveLines(RangeLines& lines) {
 		assert(line.size() == DEBUG_MERGE);
 #endif
         size_t pair[] = {fileOffset, line.size()};
-        m_tempFile.WriteNumbers(pair);
+        m_tempFile.WriteNumbers(pair, sizeof(pair)/sizeof(size_t));
 
     });
 
@@ -51,7 +51,12 @@ const CharBuffer& SortedFile::GetFirst() const {
 	}
 
     size_t filePosition[] = {0,0};
-    m_tempFile.ReadNumbers(filePosition);
+	if (!m_tempFile.ReadNumbers(filePosition, sizeof(filePosition) / sizeof(size_t)))
+	{
+		m_first.clear();
+		return m_first;
+	}
+	
     const uint16_t lineSize = filePosition[1];
     CHECK_CONTRACT(lineSize > 0, "Found empty line in chunk");
 
@@ -75,11 +80,13 @@ const CharBuffer& SortedFile::GetFirst() const {
 
 bool SortedFile::Pop() {
     m_first.clear();
-    if (m_tempFile.IeEOF()) {
+	--m_linesCount;
+
+	if (!m_linesCount || GetFirst().empty() || m_tempFile.IsEOF()) {
         m_tempFile.Close();
-        return true;
+        return false;
     }
-	return false;
+	return true;
 }
 
 } // external_sort

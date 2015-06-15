@@ -111,14 +111,14 @@ void FileWrapper::Rewind() const {
 	rewind(m_file);
 }
 
-void FileWrapper::WriteNumbers(size_t numbers[]) const {
+void FileWrapper::WriteNumbers(size_t numbers[], size_t count) const {
     assert(m_file);
-    CHECK_CONTRACT(sizeof(numbers)/sizeof(size_t) == std::fwrite(numbers, sizeof(size_t), sizeof(numbers)/sizeof(size_t), m_file), "Cannot write numbers to file");
+    CHECK_CONTRACT(count == std::fwrite(numbers, sizeof(size_t), count, m_file), "Cannot write numbers to file");
 }
 
-void FileWrapper::ReadNumbers(size_t numbers[]) const {
+bool FileWrapper::ReadNumbers(size_t numbers[], size_t count) const {
     assert(m_file);
-    CHECK_CONTRACT(sizeof(numbers)/sizeof(size_t) == fread(numbers, sizeof(size_t), sizeof(numbers)/sizeof(size_t), m_file), "Cannot read numbers from file");
+    return count == fread(numbers, sizeof(size_t), count, m_file);
 }
 
 FileWrapper::FileWrapper(const external_sort::FileWrapper &wrapper) {
@@ -129,7 +129,7 @@ void FileWrapper::operator=(const external_sort::FileWrapper &wrapper) {
     assert(false && "FileWrapper disable assign operator");
 }
 
-bool FileWrapper::IeEOF() const {
-    return feof(m_file);
+bool FileWrapper::IsEOF() const {
+    return feof(m_file) != 0;
 }
 } // namespace
