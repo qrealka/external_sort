@@ -65,7 +65,7 @@ void FileSplitter::SplitImpl(const size_t splitSize)
 	m_parts.emplace_back(m_file, position); // create split
 
 	RangeLines lines;
-	lines.reserve(chunk.size() / 2);
+	lines.reserve(chunk.size() / sizeof(RangeConstChar));
 
 	for (const auto buffer = chunk.data();;) {
 		const auto bufferLength = m_file.Read(position, buffer, splitSize);

@@ -20,14 +20,14 @@ endif()
 
 # specify maximum size part of input file in MB
 if (NOT DEFINED MAX_SORTED_SIZE)
-    add_definitions(-DMAX_SORTED_SIZE=1024)
+    add_definitions(-DMAX_SORTED_SIZE=512)
 else()
     add_definitions(-DMAX_SORTED_SIZE=${MAX_SORTED_SIZE})
 endif()
 
 # limit std:string size in KB
 if (NOT DEFINED MAX_STRING_SIZE)
-    add_definitions(-DMAX_STRING_SIZE=1024)
+    add_definitions(-DMAX_STRING_SIZE=512)
 else()
     add_definitions(-DMAX_STRING_SIZE=${MAX_STRING_SIZE})
 endif()
